@@ -1,0 +1,18 @@
+{
+    "files.associations": {
+        "fstream": "c",
+        "xstring": "c",
+        "xutility": "c",
+        "xlocale": "c",
+        "token.h": "c",
+        "tokenvector.h": "c",
+        "system_error": "c",
+        "stdarg.h": "c",
+        "format": "c",
+        "compilererrors.h": "c",
+        "stdbool.h": "c",
+        "tokenizer.h": "c",
+        "stdlib.h": "c",
+        "stdio.h": "c"
+    }
+}
