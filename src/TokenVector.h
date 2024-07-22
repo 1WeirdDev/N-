@@ -9,5 +9,5 @@ struct TokenVector{
 };
 
 struct TokenVector CreateTokenVector();
-
+struct Token GetToken();
 #endif
