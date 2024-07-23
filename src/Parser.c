@@ -24,16 +24,80 @@ void PrintParserError(int error_code, int line, const char* data, ...){
     va_end(args);
 }
 
-struct Token GetNextToken(unsigned int add){
+struct Token GetToken(unsigned int add){
     if(current_token_index + add < file_data->vec.num_elements)return file_data->vec.element_data[current_token_index + add];
     struct Token t;
-    t.type = TTNone;
+    t.type = TTEOF;
     t.value = NULL;
     return t;
 }
 
-struct ASTNode* ParseExpression(){
-    
+//Parses a R or L value
+struct ASTNode* ParseValue(){
+    struct Token token = GetToken(0);
+    struct ASTNode* node = NULL;
+
+    switch(token.type){
+    case TTInt32:
+        node = GenRValue(token.type, token.value);
+        break;
+    default:
+        PrintParserError(PARSE_ERROR_INVALID_EXPRESSION, token.line, "Invalid Expression");
+    }
+
+    current_token_index++;
+    return node;
+}
+struct ASTNode* ParseAST(){
+    struct Token token = GetToken(0);
+
+    switch(token.type){
+    case TTKeyword:
+        if(IsKeywordValueType(token.value)){
+            printf("Keyword is value type\n");
+
+            struct Token identifier_token = GetToken(1);
+
+            if(identifier_token.type != TTIdentifier){
+                PrintParserError(PARSE_ERROR_INVALID_VARIABLE_DECLERATION, identifier_token.line, "Invalid Identifier creation.");
+                return;
+            }
+
+            //Check for variable decleration and or assignment
+            struct Token next = GetToken(2);
+            if(next.value == ';'){
+                //Ok simple variable decleration
+                return GenCreateVarNode(token.value, identifier_token.value);
+            }
+            if(next.value == '='){
+                //Variable creation and assignment
+                current_token_index+=2;
+                struct Token expression_token = GetToken(0);
+                struct ASTNode* right = ParseValue();
+
+                if(right == NULL){
+                    PrintParserError(PARSE_ERROR_INVALID_EXPRESSION, expression_token.line, "Invalid expression for variable assignment");
+                    return;
+                }
+
+                //TODO: free mem
+                if(GetToken(0).value != ';'){
+                    PrintParserError(PARSE_ERROR_NO_SEMICOLON, identifier_token.line, "Expected semicolon");
+                    return;
+                }
+
+                return GenCreateNAssignVarNode(token.value, identifier_token.value, right);
+            }
+
+            PrintParserError(PARSE_ERROR_INVALID_VARIABLE_DECLERATION, identifier_token.line, "Invalid Identifier creation. Expected decleration or assignment");
+            return;
+        }
+        break;
+    default:
+        printf("INVALID\n");
+        exit(-1);
+        return NULL;
+    }
 }
 void ParseFileData(struct FileData* new_file_data){
     file_data = new_file_data;
@@ -44,58 +108,8 @@ void ParseFileData(struct FileData* new_file_data){
     vector.element_data = NULL;
     vector.num_elements = 0;
 
-    //TODO: free memory when invalid expression
-    for(current_token_index = 0; current_token_index < file_data->vec.num_elements; current_token_index++){
-        struct Token current_token = file_data->vec.element_data[current_token_index];
-        switch(current_token.type){
-        case TTKeyword:{
-            if(strcmp((const char*)current_token.value, "int") == 0){
-                if(GetNextToken(1).type == TTIdentifier){
-                    if((char*)GetNextToken(2).value == '='){
-                        //Creating a variable and assigning it
-                        if(GetNextToken(3).type != TTInt32){
-                            PrintParserError(PARSE_ERROR_INVALID_ASSIGNMENT, GetNextToken(3).line, "Expected int32 for assignment, instead got %s", GetTokenName(GetNextToken(3)));
-                            return;
-                        }
-                        if(GetNextToken(4).value != ';'){
-                            PrintParserError(PARSE_ERROR_NO_SEMICOLON, GetNextToken(4).line, "Expected ; after variable decleration");
-                            return;
-                        }
-                        struct ASTNode* ast = GenCreateNAssignVarNode((const char*)current_token.value, (const char*)GetNextToken(1).type, (void*)GetNextToken(2).value);
-                        ASTNodeVectorPushBack(&vector, ast);
-                        current_token_index+=4;
-                    }
-                    else if((char*)GetNextToken(2).value == ';'){
-                        struct ASTNode* ast = GenCreateVarNode((const char*)current_token.value, (const char*)GetNextToken(1).type);
-                        ASTNodeVectorPushBack(&vector, ast);
-                        current_token_index+=2;
-                    }else{
-                        PrintParserError(PARSE_ERROR_INVALID_EXPRESSION, GetNextToken(2).line, "Expected variable decleration or assignment, instead got %s", (const char*)GetNextToken(2).value);
-                        return;
-                    }
-                    continue;
-                }
-            }
-        }break;
-        case TTIdentifier:{
-            if((char*)GetNextToken(1).value == '='){
-                if(IsValueType(GetNextToken(2).type)){
-                    if(GetNextToken(3).value != ';'){
-                        PrintParserError(PARSE_ERROR_NO_SEMICOLON, GetNextToken(3).line, "Expected ; after variable decleration");
-                        return;
-                    }
-                    struct ASTNode* ast = GenAssignVariable((const char*)current_token.value, GetNextToken(2).type, (void*)GetNextToken(2).value);
-                    ASTNodeVectorPushBack(&vector, ast);
-                    current_token_index+=3;
-                }else{
-                    PrintParserError(PARSE_ERROR_INVALID_EXPRESSION, current_token.line, "Invalid Expression. Expected Value Type instead got %s",(const char*)GetNextToken(2).value);
-                }
-            }
-        }break;
-        default:
-            PrintParserError(PARSE_ERROR_INVALID_EXPRESSION, current_token.line, "Invalid Expression, instead got %s",GetTokenName(current_token));
-            return;
-        }
+    for(current_token_index = 0; current_token_index < new_file_data->vec.num_elements; current_token_index++){
+        ASTNodeVectorPushBack(&vector, ParseAST());
     }
 
     printf("AST Nodes count %d\n", vector.num_elements);

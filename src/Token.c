@@ -3,8 +3,8 @@
 const char* keywords[KEYWORDS] = {"int"};
 const char* GetTokenName(struct Token token){
     switch(token.type){
-    case TTNone:
-        return "NONE";
+    case TTEOF:
+        return "EOF";
     case TTString:
         return "String";
     case TTIdentifier:
@@ -36,4 +36,9 @@ bool IsValueType(enum TokenType type){
     default:
         return false;
     }
+}
+
+bool IsKeywordValueType(const char* value){
+    if(value == "int")return true;
+    return false;
 }

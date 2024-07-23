@@ -39,11 +39,9 @@ struct ASTNode* GenCreateVarNode(const char* variable_type, const char* variable
     node->right = (void*)variable_name;
     return node;
 }
-struct ASTNode* GenCreateNAssignVarNode(const char* variable_type, const char* variable_name, void* value){
+struct ASTNode* GenCreateNAssignVarNode(const char* variable_type, const char* variable_name, struct ASTNode* value){
     //LEFT = (ASTNode*) GenCreateVariableNode
-    //Right = (void*) any type of data
-    //Not assining right as r value since we already have the variable type on left
-    //Might change in the future
+    //Right = RLValue ASTNode*
     struct ASTNode* node = malloc(sizeof(struct ASTNode));
     InitializeASTNode(node);
     node->type = AST_CreateVariableNAssign;

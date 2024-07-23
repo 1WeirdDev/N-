@@ -5,7 +5,7 @@
 #include <stdbool.h>
 
 enum TokenType{
-    TTNone   =0,
+    TTEOF   =0,
     TTIdentifier,
     TTInt32,
     TTString,
@@ -26,4 +26,5 @@ extern const char* keywords[1];
 struct Token CreateToken(enum TokenType type, size_t line, void* value);
 const char* GetTokenName(struct Token token);
 bool IsValueType(enum TokenType type);
+bool IsKeywordValueType(const char* value);
 #endif
