@@ -7,7 +7,7 @@ FILES	= src/**.c
 
 default: all
 
-all: build run
+all: build run_debug
 
 build:
 	$(MF) bin
@@ -18,8 +18,10 @@ clean:
 update:
 	clean
 	Push.bat
-run:
+run_debug:
 	echo on
 	gdb -ex run --args bin/n++ -i
 	#gdb bin/n++
 	#run  -i
+run:
+	bin/n++ -i

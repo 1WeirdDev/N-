@@ -44,15 +44,47 @@ struct ASTNode* ParseValue(){
     switch(token.type){
     case TTInt32:
         node = GenRValue(token.type, token.value);
-        break;
+        current_token_index++;
+        return node;
     case TTIdentifier:
-        //TODO: Check for function call
-        node = GenLValue(token.value);
-        break;
-    }
+        //Checking for function call
+        if((char)GetToken(1).value == '('){
+            //Starting function call
+            current_token_index+=2;
+            //Getting parameters
+            struct Token new_token = GetToken(0);
+            struct ASTNode* value = ParseValue();
 
-    current_token_index++;
-    return node;
+            struct ASTNodeVector vector;
+            vector.num_elements = 0;
+            vector.element_data = NULL;
+
+            while(value != NULL){
+                //Check if l/r value or expression
+                new_token = GetToken(0);
+                ASTNodeVectorPushBack(&vector, value);
+                value = NULL;
+
+                if((char)new_token.value == ','){
+                    current_token_index++;
+                    value = ParseValue();
+                    new_token = GetToken(0);
+                }
+            }
+            if((char)new_token.value != ')'){
+                PrintParserError(PARSE_ERROR_INVALID_FUNCTION_CALL, new_token, "Expected ) after funciton call");
+                node = NULL;
+                break;
+            }
+            current_token_index+=1;
+            node = GenFunctionCall(token.value, vector);
+            return node;
+        }
+        node = GenLValue(token.value);
+        current_token_index++;
+        return node;
+    }
+    return NULL;
 }
 struct ASTNode* ParseAST(){
     struct Token token = GetToken(0);
@@ -71,7 +103,6 @@ struct ASTNode* ParseAST(){
             if((char)next.value == ';'){
                 //Ok simple variable decleration
                 current_token_index+=2;
-                puts("RETURNING GenCreateVarNode\n");
                 return GenCreateVarNode(token.value, identifier_token.value);
             }
             if((char)next.value == '='){
@@ -91,7 +122,6 @@ struct ASTNode* ParseAST(){
                     return NULL;
                 }
 
-                puts("RETURNING GenCreateNAssignVarNode\n");
                 return GenCreateNAssignVarNode(token.value, identifier_token.value, right);
             }
 
@@ -99,6 +129,7 @@ struct ASTNode* ParseAST(){
             return NULL;
         }
         else if(strcmp(token.value, "void") == 0){
+            //Void function start
             struct Token function_name = GetToken(1);
             if(function_name.type != TTIdentifier){
                 PrintParserError(PARSE_ERROR_EXPECTED_IDENTIFER, function_name, "Expected identifier for function decleration");
@@ -111,6 +142,7 @@ struct ASTNode* ParseAST(){
             current_token_index+=3;
             token = GetToken(0);
 
+            //Function Arguments
             while(IsKeywordValueType(token.value)){
                 struct Token argument_name = GetToken(1);
                 if(argument_name.type != TTIdentifier){
@@ -120,9 +152,8 @@ struct ASTNode* ParseAST(){
 
                 current_token_index+=2;
                 token = GetToken(0);
-                if(token.type != TTKeyword){
+                if(token.type != TTKeyword)
                     break;
-                }
             }
 
             if((char)token.value != ')'){
@@ -140,32 +171,14 @@ struct ASTNode* ParseAST(){
             vector.num_elements = 0;
             vector.element_data = NULL;
 
-            puts("Test1");
-            while(true){
-                token = GetToken(0);
-                if(token.type == TTEOF){
-                    PrintParserError(PARSE_ERROR_EOF, GetToken(-1), "Expected } after function body");
-                    return NULL;
-                }
-                if(token.value == '}')break;
-                struct ASTNode* node = ParseAST();
-                current_token_index++;
-                
-                ASTNodeVectorPushBack(&vector, node);
-            }
-            puts("Test2");
+            //Getbody of function
+            
+            printf("Test2\n");
             if((char)GetToken(0).value != '}'){
                 PrintParserError(PARSE_ERROR_NO_CURLY_BRACE, GetToken(2), "Expected } after function arguments list");
                 return NULL;
             }
-            puts("Test3");
-
-            struct ASTNode* function_call = GenFunctionCreation(function_name.value);
-            function_call->children.element_data = vector.element_data;
-            function_call->children.num_elements = vector.num_elements;
-            
-            puts("Tes4");
-            return function_call;
+            return  GenFunctionCreation(function_name.value, vector);
         }
         PrintParserError(PARSE_ERROR_INVALID_KEYWORD_USE, token, "Invalid Keyword use");
         return NULL;
@@ -180,7 +193,6 @@ struct ASTNode* ParseAST(){
                 PrintParserError(PARSE_ERROR_NO_SEMICOLON, GetToken(0), "Expected semicolon");
                 return NULL;
             }
-            puts("Returning variable assingment\n");
             return GenAssignVariable(token.value, right);
         }
         if((char)next.value == '('){
@@ -189,12 +201,16 @@ struct ASTNode* ParseAST(){
             //Getting parameters
             struct Token new_token = GetToken(0);
             struct ASTNode* value = ParseValue();
+            struct ASTNodeVector vector;
+            vector.element_data = NULL;
+            vector.num_elements = 0;
 
             while(value != NULL){
                 //Check if l/r value or expression
                 new_token = GetToken(0);
+                ASTNodeVectorPushBack(&vector, value);
                 value = NULL;
-                
+
                 if((char)new_token.value == ','){
                     current_token_index++;
                     value = ParseValue();
@@ -210,8 +226,7 @@ struct ASTNode* ParseAST(){
                 return NULL;
             }
             current_token_index+=1;
-            puts("Returning function call");
-            return GenFunctionCall(token.value);
+            return GenFunctionCall(token.value, vector);
         }
 
         PrintParserError(PARSE_ERROR_INVALID_VARIABLE_DECLERATION, GetToken(1), "Expected decleration or assignment");

@@ -33,8 +33,8 @@ struct ASTNode* GenRValue(enum TokenType type, void* variable_data);
 struct ASTNode* GenCreateVarNode(const char* variable_type, const char* variable_name);
 struct ASTNode* GenCreateNAssignVarNode(const char* variable_type, const char* variable_name, struct ASTNode* value);
 struct ASTNode* GenAssignVariable(const char* variable_name, struct ASTNode* variable_data);
-struct ASTNode* GenFunctionCreation(const char* function_name);
-struct ASTNode* GenFunctionCall(const char* function_name);
+struct ASTNode* GenFunctionCreation(const char* function_name, struct ASTNodeVector vector);
+struct ASTNode* GenFunctionCall(const char* function_name, struct ASTNodeVector vector);
 
 void DeleteASTNode(struct ASTNode* ast);
 #endif

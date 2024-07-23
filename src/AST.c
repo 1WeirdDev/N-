@@ -18,10 +18,16 @@ void DeleteASTNode(struct ASTNode* ast){
         free(ast->right);
         break;
     case AST_FunctionCreation:
-        for(size_t i = 0; i < ast->children.num_elements; i++){
+        for(size_t i = 0; i < ast->children.num_elements; i++)
             DeleteASTNode(ast->children.element_data[i]);
-        }
+        ASTNodeVectorDeleteData(&ast->children);
         break;
+    case AST_FunctionCall:
+        for(size_t i = 0; i < ast->children.num_elements; i++)
+            DeleteASTNode(ast->children.element_data[i]);
+        ASTNodeVectorDeleteData(&ast->children);
+        break;
+    
     }
     ASTNodeVectorDeleteData(&ast->children);
     free(ast);
@@ -80,9 +86,10 @@ struct ASTNode* GenAssignVariable(const char* variable_name, struct ASTNode* var
 //The children will be ASTNode*
 //Left is function identifier
 //Right is the function arg list
-struct ASTNode* GenFunctionCreation(const char* function_name){
+struct ASTNode* GenFunctionCreation(const char* function_name, struct ASTNodeVector vector){
     struct ASTNode* node = malloc(sizeof(struct ASTNode));
-    InitializeASTNode(node);
+    node->children.num_elements = vector.num_elements;
+    node->children.element_data = vector.element_data;
     node->type = AST_FunctionCreation;
     node->left = (void*)function_name;
     node->right = NULL;
@@ -90,9 +97,10 @@ struct ASTNode* GenFunctionCreation(const char* function_name){
 }
 //The children will the funciton arguments
 //Argument ASTNode* is RValue
-struct ASTNode* GenFunctionCall(const char* function_name){
+struct ASTNode* GenFunctionCall(const char* function_name, struct ASTNodeVector vector){
     struct ASTNode* node = malloc(sizeof(struct ASTNode));
-    InitializeASTNode(node);
+    node->children.num_elements = vector.num_elements;
+    node->children.element_data = vector.element_data;
     node->type = AST_FunctionCall;
     node->left = (void*)function_name;
     return node;

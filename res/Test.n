@@ -1,13 +1,12 @@
 //This is a comment
 int i = 15;
-int x;
-x = 5;
-x = 5;
 void hello(int hello){
+    //TODO: other data types
     int gg = 0;
     gg = 12;
     gg =123;
     gg = 90;
-    int x = 21;
+    void test(){}
+    int x = hello(2);
 }
-hello(param,param2, 5, GetHello());
+hello(param,param2, 5, GetHello(GetTest(), 5));
