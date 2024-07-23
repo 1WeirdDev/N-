@@ -23,7 +23,7 @@ struct FileData* l_current_file = NULL;
 struct FileData CreateFileData(const char* location){
     FILE* file = fopen(location, "rb");
     if(file == NULL){
-        printf("Compiler Error %d, Cant open file %s", CMP_ERROR_CANT_OPEN, location);
+        printf("Error %d, Cant open file %s", CMP_ERROR_CANT_OPEN, location);
         exit(CMP_ERROR_CANT_OPEN);
     }
 
@@ -78,7 +78,6 @@ void CreateTokens(struct FileData* file_data){
 
     for(current_character_index = 0; current_character_index < file_data->length; current_character_index++){
         char current_char = GetCurrentChar();
-        
         switch(current_char){
         case ' ':
         case '\t'://TODO these special tabs might have spaces and stuff
@@ -86,6 +85,7 @@ void CreateTokens(struct FileData* file_data){
             continue;
         case '\n':
             line++;
+            character_line_index = 1;
             break;
         case '/':{
             if(GetNextChar() == '/'){
@@ -106,20 +106,19 @@ void CreateTokens(struct FileData* file_data){
         case '{':
         case '}':
         case ';':
-            TokenVectorPushBack(&file_data->vec, CreateToken(TTSpecial, line, (void*)current_char));
+        case ',':{
+            TokenVectorPushBack(&file_data->vec, CreateToken(TTSpecial, line, character_line_index, (void*)current_char));
             break;
+        }
         case '-':
         case '+':
         case '*':
-        case '=':
-            struct Token t;
-            t.type = TTOperator;
-            t.line = line;
-            t.value = (void*)current_char;
+        case '=':{
+            struct Token t = CreateToken(TTOperator, line, character_line_index, (void*)current_char);
             TokenVectorPushBack(&file_data->vec, t);
             break;
+        }
         default:{
-            char ch = '0';
             if(IsIdentifierStartChar(current_char)){
                 char* identifier = calloc(2, sizeof(char));
                 size_t iden_size = 1;
@@ -128,6 +127,7 @@ void CreateTokens(struct FileData* file_data){
                 while(IsIdentifierChar(GetNextChar())){
                     current_character_index++;
                     iden_size++;
+                    character_line_index++;
 
                     char* new_iden = (char*)calloc(iden_size + 1, sizeof(char));
                     current_char = GetCurrentChar();
@@ -138,15 +138,15 @@ void CreateTokens(struct FileData* file_data){
                     free(identifier);
                     identifier = new_iden;
                 }
-                struct Token t;
-                t.type = TTIdentifier;
-                t.line = line;
-                t.value = (void*)identifier;
+                struct Token t = CreateToken(TTIdentifier, line, character_line_index, (void*)identifier);
 
                 //Check if identifier
                 for(unsigned char i = 0; i < KEYWORDS; i++){
-                    if(strcmp(identifier, keywords[i]) == 0)
+                    if(strcmp(identifier, keywords[i]) == 0){
                         t.type = TTKeyword;
+                        i = KEYWORDS;
+                        //Could just say break
+                    }
                 }
                 TokenVectorPushBack(&file_data->vec, t);
                 continue;
@@ -160,6 +160,7 @@ void CreateTokens(struct FileData* file_data){
                 while(IsNumber(GetNextChar()) || GetNextChar() == '.'){
                     current_character_index++;
                     iden_size++;
+                    character_line_index++;
 
                     char* new_iden = calloc(iden_size + 1, sizeof(char));
                     current_char = GetCurrentChar();
@@ -186,17 +187,20 @@ void CreateTokens(struct FileData* file_data){
                     continue;
                 }
 
-                struct Token t;
-                t.type = TTInt32;
-                t.line = line;
-                t.value = (void*)identifier;
-                TokenVectorPushBack(&file_data->vec, t);
+                struct Token token;
+                token.type = TTInt32;
+                token.line = line;
+                token.char_index = character_line_index;
+                token.value = (void*)identifier;
+                TokenVectorPushBack(&file_data->vec, token);
                 continue;
             }
             PrintLXRError(CMP_ERROR_UNIDENTIFIED_TOKEN, "Character Index %d Unidentified Character: \x1B[31m%c\033[0m\t\t", (int)current_char, current_char);
            // printf("CompilerError %d. Unidentified token %c\n", , current_char);
         }
         }
+        
+        character_line_index++;
     }
 }
 void DeleteFileData(struct FileData* file){

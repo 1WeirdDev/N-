@@ -22,10 +22,11 @@ const char* GetTokenName(struct Token token){
     }
 }
 
-struct Token CreateToken(enum TokenType type, size_t line, void* value){
+struct Token CreateToken(enum TokenType type, size_t line, size_t char_index, void* value){
     struct Token token;
     token.type = type;
     token.line = line;
+    token.char_index = char_index;
     token.value = value;
     return token;
 }
@@ -39,6 +40,7 @@ bool IsValueType(enum TokenType type){
     }
 }
 const char* int_name = "int";
+
 bool IsKeywordValueType(const char* value){
     if(strcmp(value, int_name) == 0){
         return true;

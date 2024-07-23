@@ -10,24 +10,30 @@ void DeleteASTNode(struct ASTNode* ast){
     //Some nodes will have different values for left and right
     //Depending on the node we will have to delete or keep different data
     switch(ast->type){
-        case AST_CreateVariableNAssign:
+    case AST_CreateVariableNAssign:
+        DeleteASTNode(ast->right);
         free(ast->left);
         break;
-        case AST_AssignVar:
+    case AST_AssignVar:
         free(ast->right);
+        break;
+    case AST_FunctionCreation:
+        for(size_t i = 0; i < ast->children.num_elements; i++){
+            DeleteASTNode(ast->children.element_data[i]);
+        }
         break;
     }
     ASTNodeVectorDeleteData(&ast->children);
     free(ast);
 }
 
-struct ASTNode* GenLValue(const char* variable_data){
+struct ASTNode* GenLValue(const char* variable_name){
     struct ASTNode* node = malloc(sizeof(struct ASTNode));
     InitializeASTNode(node);
     node->type = AST_L_VALUE;
 
     //L Values are always identifiers for now atleast
-    node->left = (void*)variable_data;
+    node->left = (void*)variable_name;
     //node->right = (void*)variable_data;
     return node;
 }
@@ -79,6 +85,7 @@ struct ASTNode* GenFunctionCreation(const char* function_name){
     InitializeASTNode(node);
     node->type = AST_FunctionCreation;
     node->left = (void*)function_name;
+    node->right = NULL;
     return node;
 }
 //The children will the funciton arguments

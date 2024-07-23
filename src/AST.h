@@ -28,7 +28,7 @@ void InitializeASTNode(struct ASTNode* ast);
 //Create Var Node
 //Left = Create Variable Node
 //Right = Value
-struct ASTNode* GenLValue(const char* variable_data);
+struct ASTNode* GenLValue(const char* variable_name);
 struct ASTNode* GenRValue(enum TokenType type, void* variable_data);
 struct ASTNode* GenCreateVarNode(const char* variable_type, const char* variable_name);
 struct ASTNode* GenCreateNAssignVarNode(const char* variable_type, const char* variable_name, struct ASTNode* value);
