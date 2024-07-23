@@ -1,6 +1,8 @@
 #include "Token.h"
+#include <string.h>
+#include <stdio.h>
 
-const char* keywords[KEYWORDS] = {"int"};
+const char* keywords[KEYWORDS] = {"int", "void"};
 const char* GetTokenName(struct Token token){
     switch(token.type){
     case TTEOF:
@@ -13,8 +15,8 @@ const char* GetTokenName(struct Token token){
         return "Keyword";
     case TTInt32:
         return "Int32";
-    case TTSeperator:
-        return "Seperator";
+    case TTSpecial:
+        return "Special";
     default:
         return "Error Unidentified Token";
     }
@@ -28,7 +30,6 @@ struct Token CreateToken(enum TokenType type, size_t line, void* value){
     return token;
 }
 
-
 bool IsValueType(enum TokenType type){
     switch(type){
     case TTInt32:
@@ -37,8 +38,10 @@ bool IsValueType(enum TokenType type){
         return false;
     }
 }
-
+const char* int_name = "int";
 bool IsKeywordValueType(const char* value){
-    if(value == "int")return true;
+    if(strcmp(value, int_name) == 0){
+        return true;
+    }
     return false;
 }

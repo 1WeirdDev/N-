@@ -10,8 +10,7 @@ all: build run
 
 build:
 	$(MF) bin
-	gcc -o bin/n++.exe -Isrc/ $(FILES) -DCOMPILER
-	gcc -o bin/n++I.exe -Isrc/ $(FILES) -DINTERPRETER
+	$(CC) -o bin/n++.exe -Wall -O3 -Isrc/ $(FILES) -DCOMPILER
 clean:
 	rm -rf bin
 

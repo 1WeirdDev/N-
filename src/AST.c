@@ -21,10 +21,20 @@ void DeleteASTNode(struct ASTNode* ast){
     free(ast);
 }
 
+struct ASTNode* GenLValue(const char* variable_data){
+    struct ASTNode* node = malloc(sizeof(struct ASTNode));
+    InitializeASTNode(node);
+    node->type = AST_L_VALUE;
+
+    //L Values are always identifiers for now atleast
+    node->left = (void*)variable_data;
+    //node->right = (void*)variable_data;
+    return node;
+}
 struct ASTNode* GenRValue(enum TokenType type, void* variable_data){
     struct ASTNode* node = malloc(sizeof(struct ASTNode));
     InitializeASTNode(node);
-    node->type = AST_CreateVariable;
+    node->type = AST_R_VALUE;
 
     node->left = (void*)type;
     node->right = (void*)variable_data;
@@ -50,12 +60,33 @@ struct ASTNode* GenCreateNAssignVarNode(const char* variable_type, const char* v
     return node;
 }
 
-struct ASTNode* GenAssignVariable(const char* variable_name, enum TokenType variable_type, void* variable_data){
+struct ASTNode* GenAssignVariable(const char* variable_name, struct ASTNode* variable_data){
     //Varaible Data will be a token*
+    //Right is a l or rvalue
     struct ASTNode* node = malloc(sizeof(struct ASTNode));
     InitializeASTNode(node);
     node->type = AST_AssignVar;
     node->left = (void*)variable_name;
-    node->right = GenRValue(variable_type, variable_data);
+    node->right =variable_data;
+    return node;
+}
+
+//The children will be ASTNode*
+//Left is function identifier
+//Right is the function arg list
+struct ASTNode* GenFunctionCreation(const char* function_name){
+    struct ASTNode* node = malloc(sizeof(struct ASTNode));
+    InitializeASTNode(node);
+    node->type = AST_FunctionCreation;
+    node->left = (void*)function_name;
+    return node;
+}
+//The children will the funciton arguments
+//Argument ASTNode* is RValue
+struct ASTNode* GenFunctionCall(const char* function_name){
+    struct ASTNode* node = malloc(sizeof(struct ASTNode));
+    InitializeASTNode(node);
+    node->type = AST_FunctionCall;
+    node->left = (void*)function_name;
     return node;
 }

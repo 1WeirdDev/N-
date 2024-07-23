@@ -11,7 +11,7 @@ enum TokenType{
     TTString,
     TTKeyword,
     TTOperator,
-    TTSeperator
+    TTSpecial
 };
 
 struct Token{
@@ -20,8 +20,8 @@ struct Token{
     void* value;
 };
 
-#define KEYWORDS 1
-extern const char* keywords[1];
+#define KEYWORDS 2
+extern const char* keywords[KEYWORDS];
 
 struct Token CreateToken(enum TokenType type, size_t line, void* value);
 const char* GetTokenName(struct Token token);

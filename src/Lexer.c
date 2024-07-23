@@ -46,11 +46,25 @@ struct FileData CreateFileData(const char* location){
     file_data.vec.num_elements = 0;
     return file_data;
 }
+void PrintLXRError(int error_code, const char* data, ...){
+    va_list args;
+    
+    // Initializing argument to the
+    // list pointer
+    va_start(args, data);
 
+    char* buffer = (char*)calloc(256, sizeof(char));
+    vsprintf (buffer,data, args);
+    printf("%s: Compiler Error %d, %s\n", l_current_file->name, error_code, buffer);
+    //printf("Compiler Error while lexing. Error %d, line: %d, %s\n", error_code, line, buffer);
+    free(buffer);
+    va_end(args);
+}
 void CreateTokens(struct FileData* file_data){
     l_current_file = file_data;
     size_t line = 1;
-    size_t current_character_index = 0;
+    size_t character_line_index = 1;    //TODO
+    size_t current_character_index = 0; //Index into the file data buffer
     //char current_char = GetCurrentChar();
 
     char GetCurrentChar(){
@@ -62,27 +76,12 @@ void CreateTokens(struct FileData* file_data){
         return file_data->data[current_character_index + 1];
     }
 
-    void PrintLXRError(int error_code, const char* data, ...){
-        va_list args;
-    
-        // Initializing argument to the
-        // list pointer
-        va_start(args, data);
-
-        char* buffer = (char*)calloc(256, sizeof(char));
-        vsprintf (buffer,data, args);
-        printf("%s: Compiler Error %d, %s\n", l_current_file->name, error_code, buffer);
-        //printf("Compiler Error while lexing. Error %d, line: %d, %s\n", error_code, line, buffer);
-        free(buffer);
-        va_end(args);
-    }
-
     for(current_character_index = 0; current_character_index < file_data->length; current_character_index++){
         char current_char = GetCurrentChar();
         
         switch(current_char){
         case ' ':
-        case '\t':
+        case '\t'://TODO these special tabs might have spaces and stuff
         case '\r':
             continue;
         case '\n':
@@ -102,8 +101,12 @@ void CreateTokens(struct FileData* file_data){
                 continue;
             }
         }
+        case '(':
+        case ')':
+        case '{':
+        case '}':
         case ';':
-            TokenVectorPushBack(&file_data->vec, CreateToken(TTSeperator, line, (void*)current_char));
+            TokenVectorPushBack(&file_data->vec, CreateToken(TTSpecial, line, (void*)current_char));
             break;
         case '-':
         case '+':
@@ -141,7 +144,7 @@ void CreateTokens(struct FileData* file_data){
                 t.value = (void*)identifier;
 
                 //Check if identifier
-                for(unsigned i = 0; i < 1; i++){
+                for(unsigned char i = 0; i < KEYWORDS; i++){
                     if(strcmp(identifier, keywords[i]) == 0)
                         t.type = TTKeyword;
                 }

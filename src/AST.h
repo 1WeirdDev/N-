@@ -6,9 +6,13 @@
 
 enum ASTNodeTypes{
     AST_None,
+    AST_L_VALUE,
+    AST_R_VALUE,
     AST_CreateVariable,
     AST_CreateVariableNAssign,
-    AST_AssignVar
+    AST_AssignVar,
+    AST_FunctionCreation,
+    AST_FunctionCall
 };
 
 struct ASTNode{
@@ -24,10 +28,13 @@ void InitializeASTNode(struct ASTNode* ast);
 //Create Var Node
 //Left = Create Variable Node
 //Right = Value
+struct ASTNode* GenLValue(const char* variable_data);
 struct ASTNode* GenRValue(enum TokenType type, void* variable_data);
 struct ASTNode* GenCreateVarNode(const char* variable_type, const char* variable_name);
-struct ASTNode* GenCreateNAssignVarNode(const char* variable_type, const char* variable_name, void* value);
-struct ASTNode* GenAssignVariable(const char* variable_name, enum TokenType type, struct ASTNode* variable_data);
+struct ASTNode* GenCreateNAssignVarNode(const char* variable_type, const char* variable_name, struct ASTNode* value);
+struct ASTNode* GenAssignVariable(const char* variable_name, struct ASTNode* variable_data);
+struct ASTNode* GenFunctionCreation(const char* function_name);
+struct ASTNode* GenFunctionCall(const char* function_name);
 
 void DeleteASTNode(struct ASTNode* ast);
 #endif
