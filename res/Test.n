@@ -1,3 +1,4 @@
 //This is a comment
-int i = 0;
+int i = 5;
 print(i);
+//int = keyword, 5 = int32

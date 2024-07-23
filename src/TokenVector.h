@@ -2,12 +2,13 @@
 #define TOKENVECTOR
 #include "Token.h"
 #include <stdlib.h>
+#include <stddef.h>
 
 struct TokenVector{
     size_t num_elements;
-    void* element_data;
+    struct Token* element_data;
 };
 
-struct TokenVector CreateTokenVector();
-struct Token GetToken();
+void TokenVectorPushBack(struct TokenVector* vec, struct Token token);
+void TokenVectorDelete(struct TokenVector* vec);
 #endif

@@ -1,13 +1,20 @@
-#include "TokenVector.c"
+#include "TokenVector.h"
+#include <string.h>
+#include <stdio.h>
 
-struct TokenVector CreateTokenVector(){
-    struct TokenVector vec;
-    vec.num_elements = 0;
-    vec.element_data = malloc(0);
+void TokenVectorPushBack(struct TokenVector* vec, struct Token token){
+    struct Token* new_data = malloc((vec->num_elements + 1) * sizeof(struct Token));
+    memcpy(new_data, vec->element_data, vec->num_elements * sizeof(struct Token));
+    new_data[vec->num_elements] = token;
+    free(vec->element_data);
+    vec->element_data = new_data;
+    vec->num_elements++;
 }
 
-struct Token* GetToken(struct TokenVector* vec, size_t index){
-    if(vec->num_elements == 0 || index >= vec->num_elements)return NULL;
-
-    return (struct Token*)(vec->element_data + sizeof(Token) * index);
+void TokenVectorDelete(struct TokenVector* vec){
+    if(vec->element_data != NULL){
+        free(vec->element_data);
+        vec->element_data = NULL;
+        vec->num_elements = 0;
+    }
 }

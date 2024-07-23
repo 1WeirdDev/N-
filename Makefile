@@ -3,7 +3,7 @@ CFLAGS  = -g
 RM      = rm -f
 RF      = rd /s /q
 MF 		= mkdir -p
-FILES	= src/Main.c src/Tokenizer.c 
+FILES	= src/**.c
 default: all
 
 all: build run

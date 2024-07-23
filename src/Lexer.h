@@ -1,5 +1,8 @@
-#ifndef TOKENIZER
-#define TOKENIZER
+#ifndef LEXER
+#define LEXER
+
+#include <stdbool.h>
+#include <ctype.h>
 
 #include "Token.h"
 #include "TokenVector.h"
@@ -10,7 +13,6 @@ struct FileData{
     struct TokenVector vec;
     size_t length;
 };
-
 
 //This will create a FILE* and read its data and return a FileData struct
 struct FileData CreateFileData(const char* location);
