@@ -13,11 +13,23 @@ void DeleteASTNode(struct ASTNode* ast){
         case AST_CreateVariableNAssign:
         free(ast->left);
         break;
+        case AST_AssignVar:
+        free(ast->right);
+        break;
     }
-    ASTNodeVectorDelete(&ast->children);
+    ASTNodeVectorDeleteData(&ast->children);
     free(ast);
 }
 
+struct ASTNode* GenRValue(enum TokenType type, void* variable_data){
+    struct ASTNode* node = malloc(sizeof(struct ASTNode));
+    InitializeASTNode(node);
+    node->type = AST_CreateVariable;
+
+    node->left = (void*)type;
+    node->right = (void*)variable_data;
+    return node;
+}
 struct ASTNode* GenCreateVarNode(const char* variable_type, const char* variable_name){
     struct ASTNode* node = malloc(sizeof(struct ASTNode));
     InitializeASTNode(node);
@@ -30,10 +42,22 @@ struct ASTNode* GenCreateVarNode(const char* variable_type, const char* variable
 struct ASTNode* GenCreateNAssignVarNode(const char* variable_type, const char* variable_name, void* value){
     //LEFT = (ASTNode*) GenCreateVariableNode
     //Right = (void*) any type of data
+    //Not assining right as r value since we already have the variable type on left
+    //Might change in the future
     struct ASTNode* node = malloc(sizeof(struct ASTNode));
     InitializeASTNode(node);
     node->type = AST_CreateVariableNAssign;
     node->left = (void*)(GenCreateVarNode(variable_type, variable_name));
-    node->right = (void*)5;
+    node->right = (void*)value;
+    return node;
+}
+
+struct ASTNode* GenAssignVariable(const char* variable_name, enum TokenType variable_type, void* variable_data){
+    //Varaible Data will be a token*
+    struct ASTNode* node = malloc(sizeof(struct ASTNode));
+    InitializeASTNode(node);
+    node->type = AST_AssignVar;
+    node->left = (void*)variable_name;
+    node->right = GenRValue(variable_type, variable_data);
     return node;
 }

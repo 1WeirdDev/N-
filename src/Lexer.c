@@ -176,8 +176,7 @@ void CreateTokens(struct FileData* file_data){
                         has_decimal = true;
                     }
                 }
-
-                printf("CURRENT CHAR %c\n", GetCurrentChar());
+                
                 if(has_decimal){
                     free(identifier);
                     PrintLXRError(CMP_ERROR_TESTING, "Error, doesnt support floating point numbers yet");

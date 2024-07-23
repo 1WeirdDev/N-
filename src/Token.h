@@ -2,6 +2,7 @@
 #define TOKEN
 
 #include <stdlib.h>
+#include <stdbool.h>
 
 enum TokenType{
     TTNone   =0,
@@ -24,4 +25,5 @@ extern const char* keywords[1];
 
 struct Token CreateToken(enum TokenType type, size_t line, void* value);
 const char* GetTokenName(struct Token token);
+bool IsValueType(enum TokenType type);
 #endif

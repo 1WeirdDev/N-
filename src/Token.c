@@ -27,3 +27,13 @@ struct Token CreateToken(enum TokenType type, size_t line, void* value){
     token.value = value;
     return token;
 }
+
+
+bool IsValueType(enum TokenType type){
+    switch(type){
+    case TTInt32:
+        return true;
+    default:
+        return false;
+    }
+}
