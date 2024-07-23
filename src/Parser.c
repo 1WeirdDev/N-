@@ -8,6 +8,8 @@
 #include <string.h>
 
 struct FileData* p_current_file = NULL;
+size_t current_token_index = 0;
+struct FileData* file_data = NULL;
 
 void PrintParserError(int error_code, int line, const char* data, ...){
     va_list args;
@@ -21,17 +23,22 @@ void PrintParserError(int error_code, int line, const char* data, ...){
     free(buffer);
     va_end(args);
 }
-void ParseFileData(struct FileData* file_data){
-    p_current_file = file_data;
-    size_t current_token_index = 0;
 
-    struct Token GetNextToken(unsigned int add){
-        if(current_token_index + add < file_data->vec.num_elements)return file_data->vec.element_data[current_token_index + add];
-        struct Token t;
-        t.type = TTNone;
-        t.value = NULL;
-        return t;
-    }
+struct Token GetNextToken(unsigned int add){
+    if(current_token_index + add < file_data->vec.num_elements)return file_data->vec.element_data[current_token_index + add];
+    struct Token t;
+    t.type = TTNone;
+    t.value = NULL;
+    return t;
+}
+
+struct ASTNode* ParseExpression(){
+    
+}
+void ParseFileData(struct FileData* new_file_data){
+    file_data = new_file_data;
+    p_current_file = file_data;
+    current_token_index = 0;
     
     struct ASTNodeVector vector;
     vector.element_data = NULL;
