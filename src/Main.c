@@ -16,7 +16,6 @@ int main(int argc, char** argv){
             is_verbose = true;
         }else{
             printf("Unidentified Argument (%s) %d\n", arg, strcmp(arg, "-i"));
-            return NPP_UNIDENTIFIED_ARG;
         }
     }
 
@@ -27,9 +26,9 @@ int main(int argc, char** argv){
     struct FileData t = CreateFileData(location);
     CreateTokens(&t);
     puts("Parsing\n\n\n");
-
-    //TODO: Do stuff with toknes
     struct ASTNodeVector* vec = ParseFileData(&t);
-    ASTNodeVectorDeleteData(&vec);
+
+    SemanticAnalyzeNodes(vec);
+    ASTNodeVectorDeleteData(vec);
     DeleteFileData(&t);
 }

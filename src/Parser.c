@@ -182,6 +182,7 @@ struct ASTNode* ParseAST(){
             }
 
             if((char)GetToken(0).value != '}'){
+                
                 PrintParserError(PARSE_ERROR_NO_CURLY_BRACE, GetToken(2), "Expected } after function arguments list");
                 return NULL;
             }
@@ -198,7 +199,7 @@ struct ASTNode* ParseAST(){
             struct ASTNode* right = ParseValue();
 
             if((char)GetToken(0).value != ';'){
-
+                DeleteASTNode(right);
                 PrintParserError(PARSE_ERROR_NO_SEMICOLON, GetToken(0), "Expected semicolon");
                 return NULL;
             }
@@ -211,8 +212,8 @@ struct ASTNode* ParseAST(){
             struct Token new_token = GetToken(0);
             struct ASTNode* value = ParseValue();
             struct ASTNodeVector vector;
-            vector.element_data = NULL;
             vector.num_elements = 0;
+            vector.element_data = NULL;
 
             while(value != NULL){
                 //Check if l/r value or expression
@@ -249,6 +250,7 @@ struct ASTNode* ParseAST(){
         return NULL;
     }
 }
+//Creates on the heap because this could get really huge and dont want to make copies
 struct ASTNodeVector* ParseFileData(struct FileData* new_file_data){
     file_data = new_file_data;
     p_current_file = file_data;
@@ -258,8 +260,8 @@ struct ASTNodeVector* ParseFileData(struct FileData* new_file_data){
     struct ASTNodeVector* vector = (struct ASTNodeVector*)malloc(sizeof(struct ASTNodeVector));
     vector->element_data = NULL;
     vector->num_elements = 0;
-
-    for(current_token_index = 0; current_token_index < new_file_data->vec.num_elements; current_token_index++){
+    
+    for(current_token_index  = 0; current_token_index < new_file_data->vec.num_elements; current_token_index++){
         struct ASTNode* ast = ParseAST();
         if(ast == NULL){
             printf("NULL \n");

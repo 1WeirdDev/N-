@@ -1,33 +1,29 @@
 #include "AST.h"
 
 void InitializeASTNode(struct ASTNode* ast){
-    ast->children.element_data = NULL;
     ast->children.num_elements = 0;
+    ast->children.element_data = NULL;
     ast->left = NULL;
     ast->right = NULL;
 }
 void DeleteASTNode(struct ASTNode* ast){
+    if(ast == NULL)return;
     //Some nodes will have different values for left and right
     //Depending on the node we will have to delete or keep different data
     switch(ast->type){
     case AST_CreateVariableNAssign:
-        DeleteASTNode(ast->right);
         free(ast->left);
+        DeleteASTNode(ast->right);
         break;
     case AST_AssignVar:
         free(ast->right);
         break;
     case AST_FunctionCreation:
-        for(size_t i = 0; i < ast->children.num_elements; i++)
-            DeleteASTNode(ast->children.element_data[i]);
-        ASTNodeVectorDeleteData(&ast->children);
+        
         break;
     case AST_FunctionCall:
-        for(size_t i = 0; i < ast->children.num_elements; i++)
-            DeleteASTNode(ast->children.element_data[i]);
-        ASTNodeVectorDeleteData(&ast->children);
+
         break;
-    
     }
     ASTNodeVectorDeleteData(&ast->children);
     free(ast);
@@ -99,9 +95,11 @@ struct ASTNode* GenFunctionCreation(const char* function_name, struct ASTNodeVec
 //Argument ASTNode* is RValue
 struct ASTNode* GenFunctionCall(const char* function_name, struct ASTNodeVector vector){
     struct ASTNode* node = malloc(sizeof(struct ASTNode));
+    printf("Size %d\n", vector.num_elements);
     node->children.num_elements = vector.num_elements;
     node->children.element_data = vector.element_data;
     node->type = AST_FunctionCall;
-    node->left = (void*)function_name;
+    //Left will be function return value
+    node->right = (void*)function_name;
     return node;
 }

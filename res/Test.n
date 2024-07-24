@@ -2,12 +2,11 @@
 int i = 15;
 i = 12;
 int i;
-void hello(int hello){
-    //TODO: other data types
-    int gg = 0;
-    gg = 12;
-    gg =123;
-    gg = 90;
-    int x = hello();
-}
-hello(param,param2, 5, GetHello(GetTest(), 5));
+//void hello(int hello){
+//    //TODO: other data types
+//    int gg = 0;
+//    gg = 12;
+//    gg =123;
+//    gg = 90;
+//}
+hello(param);

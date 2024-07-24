@@ -3,4 +3,5 @@
 
 #include "AST.h"
 
+void SemanticAnalyzeNodes(struct ASTNodeVector* vec);
 #endif
