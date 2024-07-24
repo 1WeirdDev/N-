@@ -13,9 +13,10 @@ void ASTNodeVectorPushBack(struct ASTNodeVector* vec, struct ASTNode* ast){
 }
 
 void ASTNodeVectorDeleteData(struct ASTNodeVector* vec){
-    if(vec->element_data != NULL){
-        free(vec->element_data);
-        vec->element_data = NULL;
-        vec->num_elements = 0;
+    for(size_t i = 0; i < vec->num_elements; i++){
+        //DeleteASTNode(vec->element_data[i]);
     }
+    free(vec->element_data);
+    vec->element_data = NULL;
+    vec->num_elements = 0;
 }

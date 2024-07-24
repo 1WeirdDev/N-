@@ -5,6 +5,7 @@
 #include "Lexer.h"
 #include "Parser.h"
 #include "ErrorCodes.h"
+#include "ASTNodeVector.h"
 
 int main(int argc, char** argv){
     bool is_verbose = false;
@@ -28,7 +29,7 @@ int main(int argc, char** argv){
     puts("Parsing\n\n\n");
 
     //TODO: Do stuff with toknes
-    ParseFileData(&t);
-
+    struct ASTNodeVector* vec = ParseFileData(&t);
+    ASTNodeVectorDeleteData(&vec);
     DeleteFileData(&t);
 }

@@ -143,24 +143,26 @@ struct ASTNode* ParseAST(){
             token = GetToken(0);
 
             //Function Arguments
-            while(IsKeywordValueType(token.value)){
-                struct Token argument_name = GetToken(1);
-                if(argument_name.type != TTIdentifier){
-                    PrintParserError(PARSE_ERROR_NO_ARGUMENT_NAME, argument_name, "Expected argument identifier");
+            while(token.type == TTKeyword){
+                if(IsKeywordValueType((const char*)token.value) == false)
+                    break;
+                struct Token identifier = GetToken(1);
+                if(identifier.type != TTIdentifier){
+                    PrintParserError(PARSE_ERROR_NO_ARGUMENT_NAME, identifier, "Expected identifier for argument");
                     return NULL;
                 }
-
                 current_token_index+=2;
+
+                if(GetToken(0).value == ',')
+                    current_token_index++;
                 token = GetToken(0);
-                if(token.type != TTKeyword)
-                    break;
             }
 
             if((char)token.value != ')'){
                 PrintParserError(PARSE_ERROR_NO_PARENTHESIS, GetToken(0), "Expected ) after function args");
                 return NULL;
             }
-            
+
             if((char)GetToken(1).value != '{'){
                 PrintParserError(PARSE_ERROR_NO_CURLY_BRACE, GetToken(1), "Expected } after function arguments list");
                 return NULL;
@@ -172,12 +174,18 @@ struct ASTNode* ParseAST(){
             vector.element_data = NULL;
 
             //Getbody of function
-            
-            printf("Test2\n");
+            struct ASTNode* node = ParseAST();
+            while(node != NULL){
+                ASTNodeVectorPushBack(&vector, node);
+                current_token_index++;
+                node = ParseAST();
+            }
+
             if((char)GetToken(0).value != '}'){
                 PrintParserError(PARSE_ERROR_NO_CURLY_BRACE, GetToken(2), "Expected } after function arguments list");
                 return NULL;
             }
+
             return  GenFunctionCreation(function_name.value, vector);
         }
         PrintParserError(PARSE_ERROR_INVALID_KEYWORD_USE, token, "Invalid Keyword use");
@@ -190,6 +198,7 @@ struct ASTNode* ParseAST(){
             struct ASTNode* right = ParseValue();
 
             if((char)GetToken(0).value != ';'){
+
                 PrintParserError(PARSE_ERROR_NO_SEMICOLON, GetToken(0), "Expected semicolon");
                 return NULL;
             }
@@ -218,10 +227,12 @@ struct ASTNode* ParseAST(){
                 }
             }
             if((char)new_token.value != ')'){
+                ASTNodeVectorDeleteData(&vector);
                 PrintParserError(PARSE_ERROR_INVALID_FUNCTION_CALL, new_token, "Expected ) after funciton call");
                 return NULL;
             }
             if((char)GetToken(1).value != ';'){
+                ASTNodeVectorDeleteData(&vector);
                 PrintParserError(PARSE_ERROR_NO_SEMICOLON, GetToken(3), "Expected ; after funciton call");
                 return NULL;
             }
@@ -233,35 +244,33 @@ struct ASTNode* ParseAST(){
         return NULL;
     break;
     default:
-        printf("INVALID %d %c\n", token.type,token.value);
-        exit(-1);
+        //printf("INVALID %d %c\n", token.type,token.value);
+        //exit(-1);
         return NULL;
     }
 }
-void ParseFileData(struct FileData* new_file_data){
+struct ASTNodeVector* ParseFileData(struct FileData* new_file_data){
     file_data = new_file_data;
     p_current_file = file_data;
     current_token_index = 0;
     has_parser_error = false;
     
-    struct ASTNodeVector vector;
-    vector.element_data = NULL;
-    vector.num_elements = 0;
+    struct ASTNodeVector* vector = (struct ASTNodeVector*)malloc(sizeof(struct ASTNodeVector));
+    vector->element_data = NULL;
+    vector->num_elements = 0;
 
     for(current_token_index = 0; current_token_index < new_file_data->vec.num_elements; current_token_index++){
-        struct ASTNode* ast=  ParseAST();
-        ASTNodeVectorPushBack(&vector, ast);
+        struct ASTNode* ast = ParseAST();
+        if(ast == NULL){
+            printf("NULL \n");
+            continue;
+        }
+        ASTNodeVectorPushBack(vector, ast);
     }
-
-    printf("AST Nodes count %d\n", vector.num_elements);
-    for(size_t i = 0; i < vector.num_elements; i++){
-        printf("I %d is type %d\n", i, vector.element_data[i]->type);
-        DeleteASTNode(vector.element_data[i]);
-    }
-
-    ASTNodeVectorDeleteData(&vector);
 
     if(has_parser_error){
         //TODO:Cleanup and exit
     }
+
+    return vector;
 }

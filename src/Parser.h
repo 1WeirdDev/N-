@@ -3,6 +3,6 @@
 
 #include "Lexer.h"
 
-void ParseFileData(struct FileData* file_data);
+struct ASTNodeVector* ParseFileData(struct FileData* file_data);
 
 #endif
